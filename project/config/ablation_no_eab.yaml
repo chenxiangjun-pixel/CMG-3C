@@ -1,0 +1,8 @@
+inherit: config/default.yaml
+model:
+  skip:
+    eab_enabled: false
+    edge_loss_weight: 0.0
+losses:
+  boundary:
+    weight: 0.0
