@@ -1,0 +1,8 @@
+inherit: config/default.yaml
+model:
+  encoder:
+    dmc:
+      enabled: false
+losses:
+  gate_entropy:
+    weight: 0.0

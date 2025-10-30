@@ -1,0 +1,99 @@
+root: /project
+data:
+  raw_dir: /project/data/raw/LiTS2017
+  processed_dir: /project/data/processed
+  spacing: [1.0, 1.0, 1.0]
+  hu_window: [-200, 250]
+  normalization: zscore
+  train_split: train
+  val_split: val
+  test_split: test
+  patch_size: [96, 160, 160]
+  batch_size: 2
+  num_workers: 6
+  persistent_workers: true
+  augmentations:
+    random_flip: true
+    random_rotate: true
+    random_intensity: true
+    random_crop: true
+    crop_foreground_ratio: 0.5
+    small_object_reweight: true
+seed: 2025
+training:
+  epochs: 300
+  eval_interval: 5
+  optimizer:
+    name: adamw
+    lr: 0.0002
+    weight_decay: 0.0001
+  scheduler:
+    name: cosine
+    min_lr: 1.0e-6
+    warmup_epochs: 10
+  amp: true
+  grad_clip: 1.0
+  grad_accum: 1
+  ema:
+    enabled: true
+    decay: 0.999
+  checkpoint:
+    dir: /project/weights
+    keep_last: 5
+  resume: null
+model:
+  in_channels: 1
+  num_classes: 3
+  base_channels: 32
+  encoder:
+    num_stages: 4
+    dmc:
+      enabled: true
+      num_scales: 3
+      dilations: [1, 2, 4]
+      gate: softmax
+      entropy_weight: 0.01
+  skip:
+    eab_enabled: true
+    edge_loss_weight: 0.3
+    boundary_loss_type: boundary_dice
+    sobel_kernel_size: 3
+  decoder:
+    cnn:
+      enabled: true
+      fusion_channels: 64
+    tmd:
+      enabled: true
+      num_queries: 16
+      decoder_layers: 3
+      fg_mask_down: 4
+      hidden_dim: 128
+      num_heads: 4
+      dropout: 0.1
+losses:
+  main:
+    dice: 1.0
+    focal: 1.0
+    bce: 0.0
+  boundary:
+    weight: 0.3
+  gate_entropy:
+    weight: 0.01
+  tmd:
+    iou_weight: 0.5
+logging:
+  dir: /project/logs
+  tensorboard: true
+  log_interval: 20
+  save_attention: true
+inference:
+  sliding_window: true
+  overlap: 0.5
+  blend_mode: gaussian
+  post_process:
+    min_component: 12
+    keep_largest: true
+hardware:
+  gpu: true
+  sync_bn: false
+  deterministic: false
